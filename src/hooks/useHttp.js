@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 /*
  useHttp custom hook
@@ -11,32 +11,35 @@ import { useState } from "react";
  error state, loading state and sendRequest function.
 */
 
-const useHttp = (requestConfig, dataHandler) => {
+const useHttp = (dataHandler) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const sendHttpRequest = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(requestConfig.url, {
-        // check is values exist or set default values for GET requests
-        method: requestConfig.method ? requestConfig.method : "GET",
-        headers: requestConfig.headers ? requestConfig.headers : {},
-        body: requestConfig.body ? JSON.stringify(requestConfig.body) : null,
-      });
+  const sendHttpRequest = useCallback(
+    async (requestConfig) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(requestConfig.url, {
+          // check is values exist or set default values for GET requests
+          method: requestConfig.method ? requestConfig.method : "GET",
+          headers: requestConfig.headers ? requestConfig.headers : {},
+          body: requestConfig.body ? JSON.stringify(requestConfig.body) : null,
+        });
 
-      if (!response.ok) {
-        throw new Error("Request failed!");
+        if (!response.ok) {
+          throw new Error("Request failed!");
+        }
+
+        const data = await response.json();
+        dataHandler(data);
+      } catch (err) {
+        setError(err.message || "Something went wrong!");
       }
-
-      const data = await response.json();
-      dataHandler(data);
-    } catch (err) {
-      setError(err.message || "Something went wrong!");
-    }
-    setIsLoading(false);
-  };
+      setIsLoading(false);
+    },
+    [dataHandler]
+  );
 
   return {
     isLoading: isLoading,
