@@ -3,7 +3,7 @@ import { useState, useCallback } from "react";
 /*
  useHttp custom hook
  Used to make Http requests, GET or POST
- Hook, takes two parameters, 
+ Hook has sendHttpRequest function,  that takes two parameters, 
  1. Object with {url, method, headers, body}
  2. Function, to handle the data returned from the request.
  ------
